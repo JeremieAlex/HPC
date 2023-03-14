@@ -1,0 +1,110 @@
+---
+title: "HPC"
+author: "Jeremie Alexander"
+date: "13/03/2023"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Load required libraries
+
+```{r}
+library(parallel)
+library(foreach)
+library(doParallel)
+```
+
+
+Run the detectCores() function from the parallel package
+
+```{r}
+detectCores()
+```
+
+
+Write a standard for loop 4,000 times, and each time calculate the mean of 100,000 random numbers from a normal distribution with mean of 10 and standard deviation of 3
+
+```{r}
+
+StartTime = Sys.time()
+means = c()
+for (i in 1:4000) {
+  random_numbers <- rnorm(100000, mean = 10, sd = 3)
+  means[i] <- mean(random_numbers)
+}
+EndTime = Sys.time()
+
+#Obtain start/end times
+StartTime
+EndTime
+
+TimeDiff = EndTime - StartTime
+TimeDiff
+```
+
+Thus, the total run time was ~11.5 seconds
+
+Predict how much faster a multi-threaded program will run compared to a serial program, based on the number of threads you have???
+
+```{r}
+PredictedTimeDecrease = TimeDiff/detectCores()
+PredictedTimeDecrease
+```
+
+Based on this, I predict the the parallel run take 1.56 seconds
+
+Now modify your for loop to run the same code in parallel, instead of running each of the 4,000 loops in order.
+
+```{r}
+
+Cores <- parallel::makeCluster(detectCores())
+doParallel::registerDoParallel(Cores)
+
+StartTimePar = Sys.time()
+meansPar <- foreach(i = 1:4000, .combine = rbind) %dopar% {
+  random_numbers2 <- rnorm(100000, mean = 10, sd = 3)
+  mean(random_numbers2)
+}
+EndTimePar = Sys.time()
+parallel::stopCluster(Cores)
+
+#Obtain start/end times
+StartTimePar
+EndTimePar
+
+TimeDiffPar = EndTimePar - StartTimePar
+TimeDiffPar
+```
+
+Parallel start time: "2023-03-13 16:00:53 EDT"
+Parallel end time: "2023-03-13 16:00:58 EDT"
+
+Thus, the parallel run time was ~4 seconds
+
+Compare the run-time for your parallel loop with the run-time for your serial loop and the theoretical run-time you calculated for the parallel loop based on the number of cores in your computer
+
+```{r}
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
